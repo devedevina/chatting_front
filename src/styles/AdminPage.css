@@ -1,0 +1,61 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: #6b7280;
+}
+
+.tab-btn.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.admin-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+}
+
+.content-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  color: #1f2937;
+}
+
+.content-placeholder {
+  text-align: center;
+  padding: 32px;
+  color: #9ca3af;
+  font-size: 16px;
+}
