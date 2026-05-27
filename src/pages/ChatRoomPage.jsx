@@ -9,6 +9,7 @@ export default function ChatRoomPage() {
   const navigate = useNavigate()
   const { messages, sendMessage, enterChatRoom, leaveChatRoom } = useChat()
   const [messageInput, setMessageInput] = useState('')
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   useEffect(() => {
     if (roomId) {
@@ -32,18 +33,26 @@ export default function ChatRoomPage() {
     }
   }
 
-  const handleLeaveRoom = () => {
+  const handleBackClick = () => {
+    setShowExitConfirm(true)
+  }
+
+  const handleConfirmExit = () => {
     leaveChatRoom()
     navigate('/')
+  }
+
+  const handleCancelExit = () => {
+    setShowExitConfirm(false)
   }
 
   return (
     <div className="chat-room-page">
       <div className="chat-header">
-        <h1 className="chat-title">채팅방</h1>
-        <button onClick={handleLeaveRoom} className="btn btn-logout">
-          나가기
+        <button onClick={handleBackClick} className="btn btn-back">
+          ← 뒤로가기
         </button>
+        <h1 className="chat-title">채팅방</h1>
       </div>
 
       <div className="chat-messages">
@@ -70,6 +79,22 @@ export default function ChatRoomPage() {
           </button>
         </div>
       </form>
+
+      {showExitConfirm && (
+        <div className="modal-overlay">
+          <div className="confirm-modal">
+            <h2>채팅방을 나가시겠습니까?</h2>
+            <div className="confirm-buttons">
+              <button onClick={handleConfirmExit} className="btn btn-primary">
+                예
+              </button>
+              <button onClick={handleCancelExit} className="btn btn-secondary">
+                아니오
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

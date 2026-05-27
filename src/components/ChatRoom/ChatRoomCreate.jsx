@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useChat } from '../../context/ChatContext'
 import '../../styles/ChatRoomCreate.css'
 
 export default function ChatRoomCreate({ onClose, onCreated }) {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -49,8 +51,9 @@ export default function ChatRoomCreate({ onClose, onCreated }) {
       }
 
       console.log('Submitting room data:', submitData)
-      await createChatRoom(submitData)
+      const createdRoom = await createChatRoom(submitData)
       onCreated()
+      navigate(`/chat/${createdRoom.id}`)
     } catch (err) {
       console.error('Room creation error:', err)
       setError(err.message)
