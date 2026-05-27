@@ -8,7 +8,7 @@ export default function ChatRoomCreate({ onClose, onCreated }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    isPublic: true,
+    isPublic: false,
     requiresPassword: false,
     password: '',
     maxMembers: 50,
