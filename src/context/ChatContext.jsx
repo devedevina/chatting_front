@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useCallback } from 'react'
 import api from '../services/api'
+import { connectSocket, disconnectSocket, sendMessage as socketSendMessage } from '../services/socket'
 
 const ChatContext = createContext(null)
 
@@ -27,22 +28,34 @@ export function ChatProvider({ children }) {
   const enterChatRoom = useCallback((roomId) => {
     setCurrentRoom(roomId)
     setMessages([])
-    // TODO: WebSocket 연결
+    try {
+      connectSocket(roomId)
+    } catch (err) {
+      console.error('WebSocket connection error:', err)
+    }
   }, [])
 
   const leaveChatRoom = useCallback(() => {
     setCurrentRoom(null)
     setMessages([])
-    // TODO: WebSocket 연결 해제
+    disconnectSocket()
   }, [])
 
   const createChatRoom = useCallback(async (roomData) => {
     setLoading(true)
     try {
       const response = await api.post('/chat-rooms', roomData)
-      setChatRooms(prev => [...prev, response.data])
+      const newRoom = response.data
+      setChatRooms(prev => [...prev, newRoom])
       setError(null)
-      return response.data
+
+      try {
+        connectSocket(newRoom.id)
+      } catch (socketErr) {
+        console.error('WebSocket connection error:', socketErr)
+      }
+
+      return newRoom
     } catch (err) {
       setError(err.message)
       throw err
@@ -65,13 +78,33 @@ export function ChatProvider({ children }) {
     }
   }, [])
 
-  const sendMessage = useCallback(async () => {
-    // TODO: WebSocket을 통해 메시지 전송
+  const addMessage = useCallback((message) => {
+    const messageWithId = {
+      ...message,
+      id: message.id || crypto.randomUUID(),
+    }
+    setMessages(prev => [...prev, messageWithId])
   }, [])
 
-  const addMessage = useCallback((message) => {
-    setMessages(prev => [...prev, message])
-  }, [])
+  const sendMessage = useCallback(async (roomId, content, userId, senderNickname) => {
+    try {
+      const messageData = {
+        content,
+        userId,
+        senderNickname,
+        timestamp: new Date().toISOString(),
+      }
+
+      addMessage(messageData)
+      socketSendMessage(roomId, messageData)
+
+      return messageData
+    } catch (err) {
+      console.error('Send message error:', err)
+      setError(err.message)
+      throw err
+    }
+  }, [addMessage])
 
   return (
     <ChatContext.Provider value={{

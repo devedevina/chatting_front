@@ -1,32 +1,50 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useChat } from '../context/ChatContext'
+import { useAuth } from '../context/AuthContext'
 import ChatMessage from '../components/ChatRoom/ChatMessage'
+import { onMessage, offMessage } from '../services/socket'
 import '../styles/ChatRoomPage.css'
 
 export default function ChatRoomPage() {
   const { roomId } = useParams()
   const navigate = useNavigate()
-  const { messages, sendMessage, enterChatRoom, leaveChatRoom } = useChat()
+  const { user } = useAuth()
+  const { messages, sendMessage, enterChatRoom, leaveChatRoom, addMessage } = useChat()
   const [messageInput, setMessageInput] = useState('')
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   useEffect(() => {
     if (roomId) {
       enterChatRoom(roomId)
+
+      const handleMessage = (messageData) => {
+        console.log('Received message:', messageData)
+        // 자신이 보낸 메시지는 이미 추가되었으므로 중복 제외
+        if (messageData.senderNickname !== user?.nickname) {
+          addMessage(messageData)
+        }
+      }
+
+      onMessage(handleMessage)
+
+      return () => {
+        offMessage(handleMessage)
+        leaveChatRoom()
+      }
     }
 
     return () => {
       leaveChatRoom()
     }
-  }, [roomId, enterChatRoom, leaveChatRoom])
+  }, [roomId, enterChatRoom, leaveChatRoom, addMessage])
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
-    if (!messageInput.trim()) return
+    if (!messageInput.trim() || !user) return
 
     try {
-      await sendMessage(messageInput)
+      await sendMessage(roomId, messageInput, user.id, user.nickname)
       setMessageInput('')
     } catch (err) {
       console.error('메시지 전송 실패:', err)
@@ -60,7 +78,7 @@ export default function ChatRoomPage() {
           <div className="messages-empty">아직 메시지가 없습니다.</div>
         ) : (
           messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
+            <ChatMessage key={msg.id} message={msg} isOwnMessage={msg.senderNickname === user?.nickname} />
           ))
         )}
       </div>
