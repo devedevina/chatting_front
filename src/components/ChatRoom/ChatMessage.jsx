@@ -3,6 +3,15 @@ import '../../styles/ChatMessage.css'
 export default function ChatMessage({ message, isOwnMessage }) {
   const isSystemMessage = message.type === 'SYSTEM'
 
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp)
+    const hours = date.getHours()
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const period = hours >= 12 ? '오후' : '오전'
+    const displayHours = String(hours % 12 || 12).padStart(2, '0')
+    return `${period} ${displayHours}:${minutes}`
+  }
+
   if (isSystemMessage) {
     return <div className="system-message">{message.content}</div>
   }
@@ -13,12 +22,8 @@ export default function ChatMessage({ message, isOwnMessage }) {
         <div className="message-nickname-label">{message.senderNickname}</div>
       )}
       <div className={`user-message ${isOwnMessage ? 'message-own' : 'message-other'}`}>
-        <div className="message-header">
-          <span className="message-time">
-            {new Date(message.timestamp).toLocaleTimeString('ko-KR')}
-          </span>
-        </div>
         <p className="message-content">{message.content}</p>
+        <span className="message-time">{formatTime(message.timestamp)}</span>
       </div>
     </div>
   )
