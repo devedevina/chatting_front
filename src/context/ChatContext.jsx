@@ -25,6 +25,20 @@ export function ChatProvider({ children }) {
     }
   }, [])
 
+  const joinChatRoom = useCallback(async (roomId) => {
+    setLoading(true)
+    try {
+      await api.post(`/chat-rooms/${roomId}/join`)
+      enterChatRoom(roomId)
+      setError(null)
+    } catch (err) {
+      setError(err.message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   const enterChatRoom = useCallback((roomId) => {
     setCurrentRoom(roomId)
     setMessages([])
@@ -114,6 +128,7 @@ export function ChatProvider({ children }) {
       loading,
       error,
       fetchChatRooms,
+      joinChatRoom,
       enterChatRoom,
       leaveChatRoom,
       createChatRoom,

@@ -1,9 +1,21 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useChat } from '../../context/ChatContext'
 import '../../styles/ChatRoomList.css'
 
 export default function ChatRoomList({ rooms }) {
   const { user } = useAuth()
+  const { joinChatRoom, loading } = useChat()
+  const navigate = useNavigate()
+
+  const handleJoinRoom = async (roomId) => {
+    try {
+      await joinChatRoom(roomId)
+      navigate(`/chat/${roomId}`)
+    } catch (err) {
+      console.error('Failed to join room:', err)
+    }
+  }
 
   return (
     <div className="room-grid">
@@ -22,9 +34,13 @@ export default function ChatRoomList({ rooms }) {
             </div>
 
             {user ? (
-              <Link to={`/chat/${room.id}`} className="btn btn-primary btn-block">
-                입장하기
-              </Link>
+              <button
+                onClick={() => handleJoinRoom(room.id)}
+                disabled={loading}
+                className="btn btn-primary btn-block"
+              >
+                {loading ? '입장 중...' : '입장하기'}
+              </button>
             ) : (
               <button disabled className="btn btn-disabled btn-block">
                 로그인 후 입장 가능
